@@ -6,6 +6,7 @@ from the Table of Contents in the PDF.
 from dataclasses import dataclass
 
 import pymupdf
+import unicodedata
 
 
 @dataclass
@@ -38,7 +39,9 @@ def extract_headings_from_toc(doc: pymupdf.Document) -> list[TableOfContentsEntr
         page: pymupdf.Page = doc.load_page(toc_item.page_num - 1)
         blocks: list[dict] = page.get_text("dict").get("blocks", [])
 
-        clean_toc_text: str = " ".join(toc_item.text.split())
+        clean_toc_text: str = unicodedata.normalize(
+            "NFKC", " ".join(toc_item.text.split())
+        ).lower()
 
         best_match_found: dict = {"block_index": None, "font_size": -99}
 
@@ -55,7 +58,9 @@ def extract_headings_from_toc(doc: pymupdf.Document) -> list[TableOfContentsEntr
                     continue
 
                 line_text = "".join(span["text"] for span in line_spans)
-                clean_line_text: str = " ".join(line_text.split())
+                clean_line_text: str = unicodedata.normalize(
+                    "NFKC", " ".join(line_text.split())
+                ).lower()
 
                 if clean_toc_text in clean_line_text:
                     toc_item.heading_found_in_text = True
