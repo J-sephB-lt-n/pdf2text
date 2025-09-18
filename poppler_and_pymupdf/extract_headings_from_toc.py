@@ -58,6 +58,7 @@ def extract_headings_from_toc(doc: pymupdf.Document) -> list[TableOfContentsEntr
                 clean_line_text: str = " ".join(line_text.split())
 
                 if clean_toc_text in clean_line_text:
+                    toc_item.heading_found_in_text = True
                     # find biggest font size on this line #
                     max_font_in_line: float = 0.0
                     for span in line_spans:
@@ -67,7 +68,7 @@ def extract_headings_from_toc(doc: pymupdf.Document) -> list[TableOfContentsEntr
                         best_match_found["block_index"] = block_idx
                         best_match_found["font_size"] = max_font_in_line
 
-        if best_match_found["block_index"]:
+        if toc_item.heading_found_in_text:
             # find the first text block prior to the match #
             for block_idx in range(best_match_found["block_index"] - 1, -1, -1):
                 block_text = _get_text_from_block(blocks[block_idx])
@@ -76,7 +77,7 @@ def extract_headings_from_toc(doc: pymupdf.Document) -> list[TableOfContentsEntr
                     break
             # find the first text block after the match #
             for block_idx in range(best_match_found["block_index"] + 1, len(blocks)):
-                block_text = _get_text_from_block(blocks[block_idx]).strip()
+                block_text = _get_text_from_block(blocks[block_idx])
                 if block_text and block_text.strip():
                     toc_item.text_after = block_text
                     break
@@ -91,5 +92,5 @@ def _get_text_from_block(block_dict: dict) -> str | None:
         for line in block_dict.get("lines", []):
             for span in line.get("spans", []):
                 parts.append(span["text"])
-        return "".join(parts)
+        return " ".join(parts)
     return None
