@@ -23,7 +23,7 @@ class TableOfContentsEntry:
 
 def extract_headings_from_toc(doc: pymupdf.Document) -> list[TableOfContentsEntry]:
     """
-    Extract the headings (and associated metadata) from `doc`.
+    Extract the headings (and associated metadata) from the table of contents of document `doc`.
 
     Approach:
         - For every table of contents entry, find that heading in the text (if it
@@ -33,6 +33,12 @@ def extract_headings_from_toc(doc: pymupdf.Document) -> list[TableOfContentsEntr
                 that text element.
             3. The largest text element found is assumed to be the heading corresponding to
                 the ToC element.
+
+    Known Problems:
+        - I'm currently using `if clean_toc_text == clean_line_text: ...` which is causing some
+            headings to be missed. I was previously using
+            `if clean_toc_text in clean_line_text: ...`, which was sometimes matching to the
+            wrong heading e.g. "Act" matching "The POPI Act" prior to the actual "Act" heading.
     """
     toc: list[TableOfContentsEntry] = [TableOfContentsEntry(*x) for x in doc.get_toc()]
     for toc_item in toc:
@@ -62,7 +68,7 @@ def extract_headings_from_toc(doc: pymupdf.Document) -> list[TableOfContentsEntr
                     "NFKC", " ".join(line_text.split())
                 ).lower()
 
-                if clean_toc_text in clean_line_text:
+                if clean_toc_text == clean_line_text:
                     toc_item.heading_found_in_text = True
                     # find biggest font size on this line #
                     max_font_in_line: float = 0.0
