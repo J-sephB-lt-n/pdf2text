@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pymupdf
 
-from extract_headings_from_toc_v2 import extract_headings_from_toc, TableOfContentsEntry
+from extract_headings_from_toc_v3 import extract_headings_from_toc, TableOfContentsEntry
 
 
 def main():
