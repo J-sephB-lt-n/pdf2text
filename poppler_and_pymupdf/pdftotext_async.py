@@ -1,12 +1,16 @@
 """
-Extract text from PDF `doc_bytes` (asynchronously) using poppler 'pdftotext'.
+Extract text from PDF `doc_bytes` (asynchronously) using poppler 'pdftotext',
+returning a list of page texts.
 """
 
 import asyncio
 
 
-async def pdftotext_async(doc_content: bytes) -> str:
-    """Extract text from PDF `doc_bytes` (asynchronously) using poppler 'pdftotext'."""
+async def pdftotext_async(doc_content: bytes) -> list[str]:
+    """
+    Extract text from PDF `doc_bytes` (asynchronously) using poppler 'pdftotext',
+    returning a list of page texts.
+    """
     proc = await asyncio.create_subprocess_exec(
         "pdftotext",
         "-enc",
@@ -25,4 +29,4 @@ async def pdftotext_async(doc_content: bytes) -> str:
     if proc.returncode != 0:
         raise RuntimeError(f"pdftotext returned (error) returncode {proc.returncode}")
 
-    return stdout.decode("utf-8")
+    return stdout.decode("utf-8").split("\f")
